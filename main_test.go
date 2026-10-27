@@ -116,6 +116,7 @@ func TestConfigureValidation(t *testing.T) {
 		{"api_key": "x", "language": "polish"},
 		{"api_key": "x", "language": "00"},
 		{"api_key": "x", "fallback_language": "PL"},
+		{"api_key": "x", "media_types": []any{"episode"}},
 	} {
 		if _, err := parseSettings(structFromMap(bad).AsMap()); err == nil {
 			t.Errorf("accepted %v", bad)
@@ -197,6 +198,10 @@ func TestSeasonsAndSeasonImages(t *testing.T) {
 	var calls atomic.Int32
 	s := testServer(t, &calls)
 	ids := providerIDs(t, map[string]any{"tvdb": "81189", "tmdb": "1396"})
+	if got, _ := s.GetSeasons(context.Background(), &pluginv1.GetSeasonsRequest{ProviderIds: ids}); len(got.GetSeasons()) != 0 || calls.Load() != 0 {
+		t.Fatalf("series served while only movies are enabled: %v", got)
+	}
+	configure(t, s, map[string]any{"api_key": "mykey", "media_types": []any{"movie", "series"}})
 	seasons, err := s.GetSeasons(context.Background(), &pluginv1.GetSeasonsRequest{ProviderIds: ids})
 	if err != nil {
 		t.Fatal(err)
@@ -255,10 +260,13 @@ func TestResolve(t *testing.T) {
 	if got := resolve("fanart://movies/603/hdmovielogo/the-matrix-5.png"); got != "https://assets.fanart.tv/fanart/movies/603/hdmovielogo/the-matrix-5.png" {
 		t.Fatalf("resolve = %q", got)
 	}
+	if got := resolve("28-years-later-the-bone-temple-68c4487cbb478.png"); got != "https://assets.fanart.tv/fanart/28-years-later-the-bone-temple-68c4487cbb478.png" {
+		t.Fatalf("resolve bare = %q", got)
+	}
 	if got := resolve("fanart://B_81189%20%281%29.png"); got != "https://assets.fanart.tv/fanart/B_81189%20%281%29.png" {
 		t.Fatalf("resolve flat = %q", got)
 	}
-	for _, bad := range []string{"https://evil.example/x.jpg", "fanart://movies/603/../../x.jpg", "fanart://music/1/x/a.jpg", "fanart://movies/603/movieposter/a.gif", "fanart://..%2F..%2Fx.jpg", "fanart://.hidden.jpg", "mediux://x"} {
+	for _, bad := range []string{"https://evil.example/x.jpg", "fanart://movies/603/../../x.jpg", "fanart://music/1/x/a.jpg", "fanart://movies/603/movieposter/a.gif", "fanart://..%2F..%2Fx.jpg", "fanart://.hidden.jpg", "mediux://x", "mediux://295df690-c7c9-42f5-8496-0d2088c521f1.jpg"} {
 		if got := resolve(bad); got != "" {
 			t.Errorf("resolve(%q) = %q", bad, got)
 		}

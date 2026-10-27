@@ -59,8 +59,8 @@ func check(binary, version string) error {
 	if _, err := typed.Runtime().Configure(ctx, &pluginv1.ConfigureRequest{Config: []*pluginv1.ConfigEntry{{Key: "settings", Value: config}}}); err != nil {
 		return err
 	}
-	image, err := typed.ImageResolver().ResolveImageURL(ctx, &pluginv1.ResolveImageURLRequest{Path: "fanart://movies/603/hdmovielogo/the-matrix-5.png"})
-	if err != nil || image.GetUrl() != "https://assets.fanart.tv/fanart/movies/603/hdmovielogo/the-matrix-5.png" {
+	image, err := typed.ImageResolver().ResolveImageURL(ctx, &pluginv1.ResolveImageURLRequest{Path: "the-matrix-5.png"})
+	if err != nil || image.GetUrl() != "https://assets.fanart.tv/fanart/the-matrix-5.png" {
 		return fmt.Errorf("native image resolution failed")
 	}
 	return nil

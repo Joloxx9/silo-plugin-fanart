@@ -24,6 +24,7 @@ Available for Linux amd64, Linux arm64 and macOS arm64.
 ## Settings
 
 - **Language** (default English) is the language artwork with text is taken in. **Fallback language** (default English) is used when nothing exists in the main one; choose **None** for textless artwork only. Artwork in any other language is never supplied, and textless artwork is always allowed.
+- **Use for** chooses movies, series (with seasons) or both. Default: movies only.
 - **Artwork types** limits what the plugin supplies.
 - **Best image only** supplies one image per type on refresh; the manual picker still shows every image in the chosen languages. **All matching images** supplies every image.
 - **Cache hours** controls how long Fanart.tv lookups are reused. Default: 24. Set 0 to disable.

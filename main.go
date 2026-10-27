@@ -136,7 +136,7 @@ func sourceKey(typ, id string) string {
 
 func (s *server) GetMetadata(_ context.Context, r *pluginv1.GetMetadataRequest) (*pluginv1.GetMetadataResponse, error) {
 	typ, id := identity(r.GetItemType(), r.GetProviderIds(), r.GetProviderId())
-	if id == "" {
+	if id == "" || !s.p.snapshot().Media[typ] {
 		return &pluginv1.GetMetadataResponse{}, nil
 	}
 	st := structFromMap(map[string]any{sourceKey(typ, id): id, "fanart": typ + ":" + id})
@@ -145,7 +145,7 @@ func (s *server) GetMetadata(_ context.Context, r *pluginv1.GetMetadataRequest) 
 
 func (s *server) GetImages(ctx context.Context, r *pluginv1.GetImagesRequest) (*pluginv1.GetImagesResponse, error) {
 	typ, id := identity(r.GetItemType(), r.GetProviderIds(), r.GetProviderId())
-	if id == "" {
+	if id == "" || !s.p.snapshot().Media[typ] {
 		return &pluginv1.GetImagesResponse{}, nil
 	}
 	b, err := s.p.get(ctx, typ, id)
@@ -206,7 +206,7 @@ func isGalleryImageRequest(ctx context.Context) bool {
 func (s *server) GetSeasons(ctx context.Context, r *pluginv1.GetSeasonsRequest) (*pluginv1.GetSeasonsResponse, error) {
 	_, id := identity("series", r.GetProviderIds(), r.GetSeriesProviderId())
 	cfg := s.p.snapshot()
-	if id == "" || !cfg.Types["season"] {
+	if id == "" || !cfg.Media["series"] || !cfg.Types["season"] {
 		return &pluginv1.GetSeasonsResponse{}, nil
 	}
 	b, err := s.p.get(ctx, "series", id)

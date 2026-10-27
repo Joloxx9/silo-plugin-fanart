@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.3
+
+- Fix: every image failed to cache ("image resolver returned empty URL") because Silo passes the path without the fanart:// prefix.
+- New **Use for** setting; movies only by default.
+
 ## 0.1.2
 
 - One API key field: the personal key from your fanart.tv profile. A key saved by 0.1.0/0.1.1 in the personal key field still works.

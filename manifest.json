@@ -1,6 +1,6 @@
 {
   "plugin_id": "community.fanart",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "checksum": "__CHECKSUM__",
   "silo_api_version": "v1",
   "presentation": {
@@ -72,7 +72,7 @@
       "key": "settings",
       "title": "Fanart.tv settings",
       "required": true,
-      "json_schema": "{\"type\":\"object\",\"required\":[\"api_key\"],\"properties\":{\"api_key\":{\"type\":\"string\",\"minLength\":1},\"artwork_types\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"poster\",\"backdrop\",\"logo\",\"clearart\",\"banner\",\"thumb\",\"disc\",\"season\"]}},\"image_selection\":{\"type\":\"string\",\"enum\":[\"BestOnly\",\"All\"]},\"cache_hours\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":168},\"language\":{\"type\":\"string\",\"enum\":[\"en\",\"pl\",\"de\",\"fr\",\"es\",\"it\",\"pt\",\"nl\",\"sv\",\"da\",\"no\",\"fi\",\"cs\",\"sk\",\"hu\",\"ro\",\"bg\",\"hr\",\"sr\",\"sl\",\"el\",\"tr\",\"ru\",\"uk\",\"he\",\"ar\",\"ja\",\"ko\",\"zh\"]},\"fallback_language\":{\"type\":\"string\",\"enum\":[\"none\",\"en\",\"pl\",\"de\",\"fr\",\"es\",\"it\",\"pt\",\"nl\",\"sv\",\"da\",\"no\",\"fi\",\"cs\",\"sk\",\"hu\",\"ro\",\"bg\",\"hr\",\"sr\",\"sl\",\"el\",\"tr\",\"ru\",\"uk\",\"he\",\"ar\",\"ja\",\"ko\",\"zh\"]}}}",
+      "json_schema": "{\"type\":\"object\",\"required\":[\"api_key\"],\"properties\":{\"api_key\":{\"type\":\"string\",\"minLength\":1},\"artwork_types\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"poster\",\"backdrop\",\"logo\",\"clearart\",\"banner\",\"thumb\",\"disc\",\"season\"]}},\"image_selection\":{\"type\":\"string\",\"enum\":[\"BestOnly\",\"All\"]},\"cache_hours\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":168},\"language\":{\"type\":\"string\",\"enum\":[\"en\",\"pl\",\"de\",\"fr\",\"es\",\"it\",\"pt\",\"nl\",\"sv\",\"da\",\"no\",\"fi\",\"cs\",\"sk\",\"hu\",\"ro\",\"bg\",\"hr\",\"sr\",\"sl\",\"el\",\"tr\",\"ru\",\"uk\",\"he\",\"ar\",\"ja\",\"ko\",\"zh\"]},\"fallback_language\":{\"type\":\"string\",\"enum\":[\"none\",\"en\",\"pl\",\"de\",\"fr\",\"es\",\"it\",\"pt\",\"nl\",\"sv\",\"da\",\"no\",\"fi\",\"cs\",\"sk\",\"hu\",\"ro\",\"bg\",\"hr\",\"sr\",\"sl\",\"el\",\"tr\",\"ru\",\"uk\",\"he\",\"ar\",\"ja\",\"ko\",\"zh\"]},\"media_types\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"movie\",\"series\"]}}}}",
       "admin_form": {
         "fields": [
           {
@@ -334,6 +334,25 @@
               {
                 "value": "zh",
                 "label": "中文"
+              }
+            ]
+          },
+          {
+            "key": "media_types",
+            "label": "Use for",
+            "description": "Which media this plugin supplies artwork for.",
+            "control": "ADMIN_FORM_CONTROL_MULTI_SELECT",
+            "default_value": [
+              "movie"
+            ],
+            "options": [
+              {
+                "value": "movie",
+                "label": "Movies"
+              },
+              {
+                "value": "series",
+                "label": "Series and seasons"
               }
             ]
           },

@@ -64,7 +64,7 @@ var tvKinds = map[string]fanartKind{
 type settings struct {
 	APIKey, Selection  string
 	Language, Fallback string
-	Types              map[string]bool
+	Types, Media       map[string]bool
 	CacheHours         int
 }
 
@@ -80,7 +80,7 @@ func defaultSettings() settings {
 	for _, k := range allKinds {
 		types[k] = true
 	}
-	return settings{Selection: "BestOnly", Language: "en", Fallback: "en", Types: types, CacheHours: 24}
+	return settings{Selection: "BestOnly", Language: "en", Fallback: "en", Types: types, Media: map[string]bool{"movie": true}, CacheHours: 24}
 }
 
 func parseSettings(values map[string]any) (settings, error) {
@@ -131,6 +131,20 @@ func parseSettings(values map[string]any) (settings, error) {
 				return settings{}, fmt.Errorf("unknown artwork type %q", kind)
 			}
 			s.Types[kind] = true
+		}
+	}
+	if v, exists := values["media_types"]; exists && v != nil {
+		list, ok := v.([]any)
+		if !ok {
+			return settings{}, errors.New("media_types must be a list")
+		}
+		s.Media = map[string]bool{}
+		for _, x := range list {
+			typ, _ := x.(string)
+			if !validChoice(typ, "movie", "series") {
+				return settings{}, fmt.Errorf("unknown media type %q", typ)
+			}
+			s.Media[typ] = true
 		}
 	}
 	if v, exists := values["cache_hours"]; exists && v != nil {
@@ -446,10 +460,11 @@ func escapePath(path string) string {
 
 func canonical(a artwork) string { return "fanart://" + escapePath(a.Path) }
 
-// resolve maps fanart://<path> to the fixed Fanart.tv asset host.
+// resolve maps fanart://<path> to the fixed Fanart.tv asset host. Silo strips
+// the scheme before calling the plugin, so the bare path is accepted too.
 func resolve(path string) string {
-	rest, ok := strings.CutPrefix(path, "fanart://")
-	if !ok {
+	rest := strings.TrimPrefix(path, "fanart://")
+	if strings.Contains(rest, "://") {
 		return ""
 	}
 	decoded, err := url.PathUnescape(rest)
