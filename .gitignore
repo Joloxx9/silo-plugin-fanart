@@ -1,0 +1,11 @@
+/dist/
+/plugin
+/silo-plugin-fanart
+/deploy/
+/deployments/
+/test-artifacts/
+/node_modules/
+__pycache__/
+*.pyc
+.env
+.env.*
