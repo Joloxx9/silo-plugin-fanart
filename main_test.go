@@ -17,9 +17,9 @@ import (
 const movieJSON = `{
  "name": "The Matrix", "tmdb_id": "603", "imdb_id": "tt0133093",
  "movieposter": [
-  {"id": "1", "url": "https://assets.fanart.tv/fanart/movies/603/movieposter/en-low.jpg", "lang": "en", "likes": "1"},
-  {"id": "2", "url": "https://assets.fanart.tv/fanart/movies/603/movieposter/en-high.jpg", "lang": "en", "likes": "9"},
-  {"id": "3", "url": "https://assets.fanart.tv/fanart/movies/603/movieposter/pl.jpg", "lang": "pl", "likes": "0"},
+  {"id": "1", "url": "https://assets.fanart.tv/fanart/the-matrix-en-low.jpg", "lang": "en", "likes": "1"},
+  {"id": "2", "url": "https://assets.fanart.tv/fanart/the-matrix-en-high.jpg", "lang": "en", "likes": "9"},
+  {"id": "3", "url": "https://assets.fanart.tv/fanart/the-matrix-pl.jpg", "lang": "pl", "likes": "0"},
   {"id": "4", "url": "https://assets.fanart.tv/fanart/movies/603/movieposter/plain.jpg", "lang": "00", "likes": "50"}
  ],
  "moviebackground": [
@@ -27,7 +27,7 @@ const movieJSON = `{
   {"id": "6", "url": "https://assets.fanart.tv/fanart/movies/603/moviebackground/clean.jpg", "lang": "", "likes": 2}
  ],
  "movielogo": [{"id": "7", "url": "https://assets.fanart.tv/fanart/movies/603/movielogo/old.png", "lang": "en", "likes": "30"}],
- "hdmovielogo": [{"id": "8", "url": "https://assets.fanart.tv/fanart/movies/603/hdmovielogo/hd.png", "lang": "en", "likes": "3"}],
+ "hdmovielogo": [{"id": "8", "url": "https://assets.fanart.tv/fanart/the-matrix-hd.png", "lang": "en", "likes": "3"}],
  "moviedisc": [{"id": "9", "url": "https://assets.fanart.tv/fanart/movies/603/moviedisc/disc.png", "lang": "en", "likes": "1", "disc": "1", "disc_type": "bluray"}],
  "moviethumb": [{"id": "10", "url": "https://evil.example/fanart/movies/603/moviethumb/x.jpg", "lang": "en", "likes": "1"}]
 }`
@@ -37,7 +37,7 @@ const tvJSON = `{
  "tvposter": [{"id": "1", "url": "https://assets.fanart.tv/fanart/tv/81189/tvposter/p.jpg", "lang": "en", "likes": "4"}],
  "seasonposter": [
   {"id": "2", "url": "https://assets.fanart.tv/fanart/tv/81189/seasonposter/s1.jpg", "lang": "en", "likes": "1", "season": "1"},
-  {"id": "3", "url": "https://assets.fanart.tv/fanart/tv/81189/seasonposter/s1b.jpg", "lang": "en", "likes": "7", "season": "1"},
+  {"id": "3", "url": "https://assets.fanart.tv/fanart/B_81189 (1).jpg", "lang": "en", "likes": "7", "season": "1"},
   {"id": "4", "url": "https://assets.fanart.tv/fanart/tv/81189/seasonposter/s0.jpg", "lang": "en", "likes": "1", "season": "0"},
   {"id": "5", "url": "https://assets.fanart.tv/fanart/tv/81189/seasonposter/all.jpg", "lang": "en", "likes": "1", "season": "all"}
  ]
@@ -134,9 +134,9 @@ func TestMovieImagesBestOnly(t *testing.T) {
 	}
 	u := urls(got.GetImages())
 	want := map[string]string{
-		"poster":   "movies/603/movieposter/pl.jpg",
+		"poster":   "the-matrix-pl.jpg",
 		"backdrop": "movies/603/moviebackground/clean.jpg",
-		"logo":     "movies/603/hdmovielogo/hd.png",
+		"logo":     "the-matrix-hd.png",
 		"disc":     "movies/603/moviedisc/disc.png",
 	}
 	for kind, path := range want {
@@ -161,7 +161,7 @@ func TestMovieGalleryAndLanguageOrder(t *testing.T) {
 		t.Fatal(err)
 	}
 	posters := urls(got.GetImages())["poster"]
-	want := []string{"movies/603/movieposter/en-high.jpg", "movies/603/movieposter/en-low.jpg", "movies/603/movieposter/pl.jpg", "movies/603/movieposter/plain.jpg"}
+	want := []string{"the-matrix-en-high.jpg", "the-matrix-en-low.jpg", "the-matrix-pl.jpg", "movies/603/movieposter/plain.jpg"}
 	if strings.Join(posters, ",") != strings.Join(want, ",") {
 		t.Fatalf("posters = %v", posters)
 	}
@@ -193,7 +193,7 @@ func TestSeasonsAndSeasonImages(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(seasons.GetSeasons()) != 2 || seasons.GetSeasons()[0].GetSeasonNumber() != 0 || seasons.GetSeasons()[1].GetPosterPath() != "fanart://tv/81189/seasonposter/s1b.jpg" {
+	if len(seasons.GetSeasons()) != 2 || seasons.GetSeasons()[0].GetSeasonNumber() != 0 || seasons.GetSeasons()[1].GetPosterPath() != "fanart://B_81189%20%281%29.jpg" {
 		t.Fatalf("seasons = %v", seasons.GetSeasons())
 	}
 	one := int32(1)
@@ -247,7 +247,10 @@ func TestResolve(t *testing.T) {
 	if got := resolve("fanart://movies/603/hdmovielogo/the-matrix-5.png"); got != "https://assets.fanart.tv/fanart/movies/603/hdmovielogo/the-matrix-5.png" {
 		t.Fatalf("resolve = %q", got)
 	}
-	for _, bad := range []string{"https://evil.example/x.jpg", "fanart://movies/603/../../x.jpg", "fanart://music/1/x/a.jpg", "fanart://movies/603/movieposter/a.gif", "mediux://x"} {
+	if got := resolve("fanart://B_81189%20%281%29.png"); got != "https://assets.fanart.tv/fanart/B_81189%20%281%29.png" {
+		t.Fatalf("resolve flat = %q", got)
+	}
+	for _, bad := range []string{"https://evil.example/x.jpg", "fanart://movies/603/../../x.jpg", "fanart://music/1/x/a.jpg", "fanart://movies/603/movieposter/a.gif", "fanart://..%2F..%2Fx.jpg", "fanart://.hidden.jpg", "mediux://x"} {
 		if got := resolve(bad); got != "" {
 			t.Errorf("resolve(%q) = %q", bad, got)
 		}
@@ -271,7 +274,7 @@ func TestErrorsNeverLeakKeys(t *testing.T) {
 }
 
 func TestLanguageNormalization(t *testing.T) {
-	for in, want := range map[string]string{"00": "", "": "", "EN": "en", "pt-BR": "pt", "xyz": "", "1a": ""} {
+	for in, want := range map[string]string{"00": "", "": "", "xx": "", "EN": "en", "pt-BR": "pt", "cz": "cs", "ua": "uk", "xyz": "", "1a": ""} {
 		if got := normalizeLanguage(in); got != want {
 			t.Errorf("normalizeLanguage(%q) = %q, want %q", in, got, want)
 		}

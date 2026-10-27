@@ -21,7 +21,11 @@ const assetHost = "https://assets.fanart.tv/fanart/"
 const maxResponse = 4 << 20
 
 var imdbID = regexp.MustCompile(`^tt[0-9]{5,10}$`)
-var assetPath = regexp.MustCompile(`^(movies|tv)/[0-9]{1,12}/[a-z]{3,20}/[A-Za-z0-9._-]{1,200}\.(jpg|jpeg|png)$`)
+
+// assetPath matches a decoded asset path below /fanart/: current flat names
+// ("the-matrix-53b1a283180a1.jpg", "B_81189 (1).png") and the older
+// "movies/603/movieposter/<name>" layout.
+var assetPath = regexp.MustCompile(`^([a-z]{2,10}/[0-9]{1,12}/[a-z]{3,20}/)?[A-Za-z0-9_()-][A-Za-z0-9._() -]{0,199}\.(jpg|jpeg|png)$`)
 
 // itemKinds are the movie and series image kinds, in the order they are returned.
 var itemKinds = []string{"poster", "backdrop", "logo", "clearart", "banner", "thumb", "disc"}
@@ -337,7 +341,8 @@ func parseBundle(raw []byte, typ string) (bundle, error) {
 }
 
 func assetPathFromURL(raw string) (string, bool) {
-	u, err := url.Parse(strings.TrimSpace(raw))
+	// Some current asset names contain unescaped spaces.
+	u, err := url.Parse(strings.ReplaceAll(strings.TrimSpace(raw), " ", "%20"))
 	if err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host != "assets.fanart.tv" {
 		return "", false
 	}
@@ -348,13 +353,20 @@ func assetPathFromURL(raw string) (string, bool) {
 	return path, true
 }
 
-// normalizeLanguage maps Fanart.tv codes to Silo's: "00" and "" mean no text.
+// normalizeLanguage maps Fanart.tv codes to Silo's: "00", "xx" and "" mean
+// no text, and Fanart.tv's "cz" and "ua" are Czech and Ukrainian.
 func normalizeLanguage(code string) string {
 	code = strings.ToLower(strings.TrimSpace(code))
 	if base, _, ok := strings.Cut(code, "-"); ok {
 		code = base
 	}
-	if len(code) != 2 || code == "00" {
+	switch code {
+	case "cz":
+		return "cs"
+	case "ua":
+		return "uk"
+	}
+	if len(code) != 2 || code == "00" || code == "xx" {
 		return ""
 	}
 	for _, r := range code {
@@ -424,13 +436,26 @@ func rank(b bundle, kind string, season int, requested string) []artwork {
 	return out
 }
 
-func canonical(a artwork) string { return "fanart://" + a.Path }
+// escapePath percent-encodes each segment of a decoded asset path.
+func escapePath(path string) string {
+	segments := strings.Split(path, "/")
+	for i, segment := range segments {
+		segments[i] = url.PathEscape(segment)
+	}
+	return strings.Join(segments, "/")
+}
+
+func canonical(a artwork) string { return "fanart://" + escapePath(a.Path) }
 
 // resolve maps fanart://<path> to the fixed Fanart.tv asset host.
 func resolve(path string) string {
 	rest, ok := strings.CutPrefix(path, "fanart://")
-	if !ok || !assetPath.MatchString(rest) {
+	if !ok {
 		return ""
 	}
-	return assetHost + rest
+	decoded, err := url.PathUnescape(rest)
+	if err != nil || !assetPath.MatchString(decoded) {
+		return ""
+	}
+	return assetHost + escapePath(decoded)
 }
