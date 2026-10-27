@@ -47,7 +47,7 @@ func testServer(t *testing.T, calls *atomic.Int32) *server {
 	t.Helper()
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		calls.Add(1)
-		if r.URL.Query().Get("api_key") != "project" || r.URL.Query().Get("client_key") != "personal" {
+		if r.URL.Query().Get("api_key") != "mykey" || r.URL.Query().Has("client_key") {
 			t.Errorf("missing keys in %s", r.URL.RawQuery)
 		}
 		switch r.URL.Path {
@@ -63,7 +63,7 @@ func testServer(t *testing.T, calls *atomic.Int32) *server {
 	t.Cleanup(srv.Close)
 	s := &server{p: newProvider()}
 	s.p.endpoint = srv.URL + "/"
-	configure(t, s, map[string]any{"api_key": "project", "client_key": "personal"})
+	configure(t, s, map[string]any{"api_key": "mykey"})
 	return s
 }
 
@@ -121,6 +121,9 @@ func TestConfigureValidation(t *testing.T) {
 			t.Errorf("accepted %v", bad)
 		}
 	}
+	if cfg, err := parseSettings(map[string]any{"client_key": " old "}); err != nil || cfg.APIKey != "old" {
+		t.Fatalf("legacy client_key: %+v, %v", cfg, err)
+	}
 	cfg, err := parseSettings(map[string]any{"api_key": "x", "artwork_types": []any{"logo"}, "cache_hours": float64(0)})
 	if err != nil || !cfg.Types["logo"] || cfg.Types["poster"] || cfg.CacheHours != 0 || cfg.Selection != "BestOnly" {
 		t.Fatalf("cfg = %+v, %v", cfg, err)
@@ -130,7 +133,7 @@ func TestConfigureValidation(t *testing.T) {
 func TestMovieImagesBestOnly(t *testing.T) {
 	var calls atomic.Int32
 	s := testServer(t, &calls)
-	configure(t, s, map[string]any{"api_key": "project", "client_key": "personal", "language": "pl"})
+	configure(t, s, map[string]any{"api_key": "mykey", "language": "pl"})
 	r := &pluginv1.GetImagesRequest{ItemType: "movie", Language: "de", ProviderIds: providerIDs(t, map[string]any{"tmdb": "603"})}
 	got, err := s.GetImages(context.Background(), r)
 	if err != nil {
@@ -180,7 +183,7 @@ func TestMovieGalleryAndLanguageOrder(t *testing.T) {
 func TestArtworkTypesFilter(t *testing.T) {
 	var calls atomic.Int32
 	s := testServer(t, &calls)
-	configure(t, s, map[string]any{"api_key": "project", "client_key": "personal", "artwork_types": []any{"logo"}})
+	configure(t, s, map[string]any{"api_key": "mykey", "artwork_types": []any{"logo"}})
 	got, err := s.GetImages(context.Background(), &pluginv1.GetImagesRequest{ItemType: "movie", ProviderIds: providerIDs(t, map[string]any{"tmdb": "603"})})
 	if err != nil {
 		t.Fatal(err)
@@ -265,7 +268,7 @@ func TestResolve(t *testing.T) {
 func TestErrorsNeverLeakKeys(t *testing.T) {
 	p := newProvider()
 	p.endpoint = "http://127.0.0.1:1/"
-	p.configure(settings{APIKey: "project-secret", ClientKey: "personal-secret", Types: defaultSettings().Types})
+	p.configure(settings{APIKey: "my-secret", Types: defaultSettings().Types})
 	_, err := p.fetch(context.Background(), "movie", "603")
 	if err == nil || strings.Contains(err.Error(), "secret") || strings.Contains(err.Error(), "127.0.0.1:1/movies") {
 		t.Fatalf("err = %v", err)
@@ -289,7 +292,7 @@ func TestLanguageNormalization(t *testing.T) {
 func TestLanguageWithoutFallback(t *testing.T) {
 	var calls atomic.Int32
 	s := testServer(t, &calls)
-	configure(t, s, map[string]any{"api_key": "project", "client_key": "personal", "language": "pl", "fallback_language": "none", "image_selection": "All"})
+	configure(t, s, map[string]any{"api_key": "mykey", "language": "pl", "fallback_language": "none", "image_selection": "All"})
 	got, err := s.GetImages(context.Background(), &pluginv1.GetImagesRequest{ItemType: "movie", ProviderIds: providerIDs(t, map[string]any{"tmdb": "603"})})
 	if err != nil {
 		t.Fatal(err)

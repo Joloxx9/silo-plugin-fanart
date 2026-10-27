@@ -62,10 +62,10 @@ var tvKinds = map[string]fanartKind{
 }
 
 type settings struct {
-	APIKey, ClientKey, Selection string
-	Language, Fallback           string
-	Types                        map[string]bool
-	CacheHours                   int
+	APIKey, Selection  string
+	Language, Fallback string
+	Types              map[string]bool
+	CacheHours         int
 }
 
 func (s settings) ttl() time.Duration {
@@ -88,10 +88,13 @@ func parseSettings(values map[string]any) (settings, error) {
 	s.APIKey, _ = values["api_key"].(string)
 	s.APIKey = strings.TrimSpace(s.APIKey)
 	if s.APIKey == "" {
+		// 0.1.0 and 0.1.1 had a separate personal key field.
+		s.APIKey, _ = values["client_key"].(string)
+		s.APIKey = strings.TrimSpace(s.APIKey)
+	}
+	if s.APIKey == "" {
 		return settings{}, errors.New("api_key is required")
 	}
-	s.ClientKey, _ = values["client_key"].(string)
-	s.ClientKey = strings.TrimSpace(s.ClientKey)
 	if v, exists := values["image_selection"]; exists && v != "" {
 		if mode, ok := v.(string); !ok || (mode != "BestOnly" && mode != "All") {
 			return settings{}, errors.New("image_selection must be BestOnly or All")
@@ -247,9 +250,6 @@ func (p *provider) fetch(ctx context.Context, typ, id string) (bundle, error) {
 		section = "tv/"
 	}
 	q := url.Values{"api_key": {cfg.APIKey}}
-	if cfg.ClientKey != "" {
-		q.Set("client_key", cfg.ClientKey)
-	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, p.endpoint+section+url.PathEscape(id)+"?"+q.Encode(), nil)
 	if err != nil {
 		return bundle{}, errors.New("Fanart.tv request could not be built")
@@ -288,11 +288,9 @@ func (p *provider) fetch(ctx context.Context, typ, id string) (bundle, error) {
 }
 
 func redact(s string, cfg settings) string {
-	for _, secret := range []string{cfg.APIKey, cfg.ClientKey} {
-		if secret != "" {
-			s = strings.ReplaceAll(s, secret, "[redacted]")
-			s = strings.ReplaceAll(s, url.QueryEscape(secret), "[redacted]")
-		}
+	if cfg.APIKey != "" {
+		s = strings.ReplaceAll(s, cfg.APIKey, "[redacted]")
+		s = strings.ReplaceAll(s, url.QueryEscape(cfg.APIKey), "[redacted]")
 	}
 	return s
 }
