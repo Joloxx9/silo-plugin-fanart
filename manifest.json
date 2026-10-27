@@ -72,7 +72,7 @@
       "key": "settings",
       "title": "Fanart.tv settings",
       "required": true,
-      "json_schema": "{\"type\":\"object\",\"required\":[\"api_key\"],\"properties\":{\"api_key\":{\"type\":\"string\",\"minLength\":1},\"client_key\":{\"type\":\"string\"},\"artwork_types\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"poster\",\"backdrop\",\"logo\",\"clearart\",\"banner\",\"thumb\",\"disc\",\"season\"]}},\"image_selection\":{\"type\":\"string\",\"enum\":[\"BestOnly\",\"All\"]},\"cache_hours\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":168}}}",
+      "json_schema": "{\"type\":\"object\",\"required\":[\"api_key\"],\"properties\":{\"api_key\":{\"type\":\"string\",\"minLength\":1},\"client_key\":{\"type\":\"string\"},\"artwork_types\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"poster\",\"backdrop\",\"logo\",\"clearart\",\"banner\",\"thumb\",\"disc\",\"season\"]}},\"image_selection\":{\"type\":\"string\",\"enum\":[\"BestOnly\",\"All\"]},\"cache_hours\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":168},\"language\":{\"type\":\"string\",\"enum\":[\"en\",\"pl\",\"de\",\"fr\",\"es\",\"it\",\"pt\",\"nl\",\"sv\",\"da\",\"no\",\"fi\",\"cs\",\"sk\",\"hu\",\"ro\",\"bg\",\"hr\",\"sr\",\"sl\",\"el\",\"tr\",\"ru\",\"uk\",\"he\",\"ar\",\"ja\",\"ko\",\"zh\"]},\"fallback_language\":{\"type\":\"string\",\"enum\":[\"none\",\"en\",\"pl\",\"de\",\"fr\",\"es\",\"it\",\"pt\",\"nl\",\"sv\",\"da\",\"no\",\"fi\",\"cs\",\"sk\",\"hu\",\"ro\",\"bg\",\"hr\",\"sr\",\"sl\",\"el\",\"tr\",\"ru\",\"uk\",\"he\",\"ar\",\"ja\",\"ko\",\"zh\"]}}}",
       "admin_form": {
         "fields": [
           {
@@ -91,20 +91,307 @@
             "secret": true
           },
           {
+            "key": "language",
+            "label": "Language",
+            "description": "Artwork with text (posters, logos, clear art) is taken in this language first. Textless artwork is always allowed.",
+            "control": "ADMIN_FORM_CONTROL_SELECT",
+            "default_value": "en",
+            "options": [
+              {
+                "value": "en",
+                "label": "English"
+              },
+              {
+                "value": "pl",
+                "label": "Polski"
+              },
+              {
+                "value": "de",
+                "label": "Deutsch"
+              },
+              {
+                "value": "fr",
+                "label": "Français"
+              },
+              {
+                "value": "es",
+                "label": "Español"
+              },
+              {
+                "value": "it",
+                "label": "Italiano"
+              },
+              {
+                "value": "pt",
+                "label": "Português"
+              },
+              {
+                "value": "nl",
+                "label": "Nederlands"
+              },
+              {
+                "value": "sv",
+                "label": "Svenska"
+              },
+              {
+                "value": "da",
+                "label": "Dansk"
+              },
+              {
+                "value": "no",
+                "label": "Norsk"
+              },
+              {
+                "value": "fi",
+                "label": "Suomi"
+              },
+              {
+                "value": "cs",
+                "label": "Čeština"
+              },
+              {
+                "value": "sk",
+                "label": "Slovenčina"
+              },
+              {
+                "value": "hu",
+                "label": "Magyar"
+              },
+              {
+                "value": "ro",
+                "label": "Română"
+              },
+              {
+                "value": "bg",
+                "label": "Български"
+              },
+              {
+                "value": "hr",
+                "label": "Hrvatski"
+              },
+              {
+                "value": "sr",
+                "label": "Srpski"
+              },
+              {
+                "value": "sl",
+                "label": "Slovenščina"
+              },
+              {
+                "value": "el",
+                "label": "Ελληνικά"
+              },
+              {
+                "value": "tr",
+                "label": "Türkçe"
+              },
+              {
+                "value": "ru",
+                "label": "Русский"
+              },
+              {
+                "value": "uk",
+                "label": "Українська"
+              },
+              {
+                "value": "he",
+                "label": "עברית"
+              },
+              {
+                "value": "ar",
+                "label": "العربية"
+              },
+              {
+                "value": "ja",
+                "label": "日本語"
+              },
+              {
+                "value": "ko",
+                "label": "한국어"
+              },
+              {
+                "value": "zh",
+                "label": "中文"
+              }
+            ]
+          },
+          {
+            "key": "fallback_language",
+            "label": "Fallback language",
+            "description": "Used when nothing exists in the main language. Other languages are never supplied.",
+            "control": "ADMIN_FORM_CONTROL_SELECT",
+            "default_value": "en",
+            "options": [
+              {
+                "value": "none",
+                "label": "None (textless only)"
+              },
+              {
+                "value": "en",
+                "label": "English"
+              },
+              {
+                "value": "pl",
+                "label": "Polski"
+              },
+              {
+                "value": "de",
+                "label": "Deutsch"
+              },
+              {
+                "value": "fr",
+                "label": "Français"
+              },
+              {
+                "value": "es",
+                "label": "Español"
+              },
+              {
+                "value": "it",
+                "label": "Italiano"
+              },
+              {
+                "value": "pt",
+                "label": "Português"
+              },
+              {
+                "value": "nl",
+                "label": "Nederlands"
+              },
+              {
+                "value": "sv",
+                "label": "Svenska"
+              },
+              {
+                "value": "da",
+                "label": "Dansk"
+              },
+              {
+                "value": "no",
+                "label": "Norsk"
+              },
+              {
+                "value": "fi",
+                "label": "Suomi"
+              },
+              {
+                "value": "cs",
+                "label": "Čeština"
+              },
+              {
+                "value": "sk",
+                "label": "Slovenčina"
+              },
+              {
+                "value": "hu",
+                "label": "Magyar"
+              },
+              {
+                "value": "ro",
+                "label": "Română"
+              },
+              {
+                "value": "bg",
+                "label": "Български"
+              },
+              {
+                "value": "hr",
+                "label": "Hrvatski"
+              },
+              {
+                "value": "sr",
+                "label": "Srpski"
+              },
+              {
+                "value": "sl",
+                "label": "Slovenščina"
+              },
+              {
+                "value": "el",
+                "label": "Ελληνικά"
+              },
+              {
+                "value": "tr",
+                "label": "Türkçe"
+              },
+              {
+                "value": "ru",
+                "label": "Русский"
+              },
+              {
+                "value": "uk",
+                "label": "Українська"
+              },
+              {
+                "value": "he",
+                "label": "עברית"
+              },
+              {
+                "value": "ar",
+                "label": "العربية"
+              },
+              {
+                "value": "ja",
+                "label": "日本語"
+              },
+              {
+                "value": "ko",
+                "label": "한국어"
+              },
+              {
+                "value": "zh",
+                "label": "中文"
+              }
+            ]
+          },
+          {
             "key": "artwork_types",
             "label": "Artwork types",
             "description": "Which kinds of Fanart.tv artwork to supply.",
             "control": "ADMIN_FORM_CONTROL_MULTI_SELECT",
-            "default_value": ["poster", "backdrop", "logo", "clearart", "banner", "thumb", "disc", "season"],
+            "default_value": [
+              "poster",
+              "backdrop",
+              "logo",
+              "clearart",
+              "banner",
+              "thumb",
+              "disc",
+              "season"
+            ],
             "options": [
-              {"value": "poster", "label": "Posters"},
-              {"value": "backdrop", "label": "Backgrounds"},
-              {"value": "logo", "label": "Logos"},
-              {"value": "clearart", "label": "Clear art"},
-              {"value": "banner", "label": "Banners"},
-              {"value": "thumb", "label": "Thumbs (landscape)"},
-              {"value": "disc", "label": "Discs"},
-              {"value": "season", "label": "Season posters"}
+              {
+                "value": "poster",
+                "label": "Posters"
+              },
+              {
+                "value": "backdrop",
+                "label": "Backgrounds"
+              },
+              {
+                "value": "logo",
+                "label": "Logos"
+              },
+              {
+                "value": "clearart",
+                "label": "Clear art"
+              },
+              {
+                "value": "banner",
+                "label": "Banners"
+              },
+              {
+                "value": "thumb",
+                "label": "Thumbs (landscape)"
+              },
+              {
+                "value": "disc",
+                "label": "Discs"
+              },
+              {
+                "value": "season",
+                "label": "Season posters"
+              }
             ]
           },
           {
@@ -113,8 +400,15 @@
             "control": "ADMIN_FORM_CONTROL_SELECT",
             "default_value": "BestOnly",
             "options": [
-              {"value": "BestOnly", "label": "Best image only", "description": "One image per type; the manual picker still shows every image."},
-              {"value": "All", "label": "All matching images"}
+              {
+                "value": "BestOnly",
+                "label": "Best image only",
+                "description": "One image per type; the manual picker still shows every image."
+              },
+              {
+                "value": "All",
+                "label": "All matching images"
+              }
             ]
           },
           {

@@ -63,6 +63,7 @@ var tvKinds = map[string]fanartKind{
 
 type settings struct {
 	APIKey, ClientKey, Selection string
+	Language, Fallback           string
 	Types                        map[string]bool
 	CacheHours                   int
 }
@@ -79,7 +80,7 @@ func defaultSettings() settings {
 	for _, k := range allKinds {
 		types[k] = true
 	}
-	return settings{Selection: "BestOnly", Types: types, CacheHours: 24}
+	return settings{Selection: "BestOnly", Language: "en", Fallback: "en", Types: types, CacheHours: 24}
 }
 
 func parseSettings(values map[string]any) (settings, error) {
@@ -96,6 +97,24 @@ func parseSettings(values map[string]any) (settings, error) {
 			return settings{}, errors.New("image_selection must be BestOnly or All")
 		}
 		s.Selection = v.(string)
+	}
+	if v, exists := values["language"]; exists && v != "" {
+		code, _ := v.(string)
+		if normalizeLanguage(code) == "" || normalizeLanguage(code) != code {
+			return settings{}, errors.New("language must be a two-letter code such as en or pl")
+		}
+		s.Language = code
+	}
+	if v, exists := values["fallback_language"]; exists && v != "" {
+		code, _ := v.(string)
+		switch {
+		case code == "none":
+			s.Fallback = s.Language
+		case normalizeLanguage(code) == "" || normalizeLanguage(code) != code:
+			return settings{}, errors.New("fallback_language must be a two-letter code such as en, or none")
+		default:
+			s.Fallback = code
+		}
 	}
 	if v, exists := values["artwork_types"]; exists && v != nil {
 		list, ok := v.([]any)
@@ -377,51 +396,33 @@ func normalizeLanguage(code string) string {
 	return code
 }
 
-// languageTier orders artwork by language. Posters prefer the requested
-// language, then English, then other text, then textless art. Backgrounds
-// prefer textless art. Logos and other text art prefer textless over a
-// foreign language.
-func languageTier(kind, lang, requested string) int {
-	switch {
-	case kind == "backdrop":
-		if lang == "" {
-			return 0
-		}
-		if lang == requested {
-			return 1
-		}
-		if lang == "en" {
-			return 2
-		}
-		return 3
-	case lang != "" && lang == requested:
-		return 0
-	case lang == "en":
-		return 1
-	case kind == "poster" || kind == "season":
-		if lang != "" {
-			return 2
-		}
-		return 3
-	case lang == "":
-		return 2
-	default:
-		return 3
+// languageTier orders artwork by the configured language, then the fallback,
+// then textless art; backgrounds put textless art first. Any other language
+// returns -1 and is never supplied.
+func languageTier(kind, lang string, cfg settings) int {
+	tiers := []string{cfg.Language, cfg.Fallback, ""}
+	if kind == "backdrop" {
+		tiers = []string{"", cfg.Language, cfg.Fallback}
 	}
+	for i, want := range tiers {
+		if lang == want {
+			return i
+		}
+	}
+	return -1
 }
 
-// rank returns every image of one kind (and season), best first: language
-// tier, then HD, then Fanart.tv likes.
-func rank(b bundle, kind string, season int, requested string) []artwork {
-	requested = normalizeLanguage(requested)
+// rank returns the images of one kind (and season) in the configured
+// languages, best first: language tier, then HD, then Fanart.tv likes.
+func rank(b bundle, kind string, season int, cfg settings) []artwork {
 	var out []artwork
 	for _, a := range b.Art {
-		if a.Kind == kind && (kind != "season" || a.Season == season) {
+		if a.Kind == kind && (kind != "season" || a.Season == season) && languageTier(kind, a.Language, cfg) >= 0 {
 			out = append(out, a)
 		}
 	}
 	sort.SliceStable(out, func(i, j int) bool {
-		ti, tj := languageTier(kind, out[i].Language, requested), languageTier(kind, out[j].Language, requested)
+		ti, tj := languageTier(kind, out[i].Language, cfg), languageTier(kind, out[j].Language, cfg)
 		if ti != tj {
 			return ti < tj
 		}

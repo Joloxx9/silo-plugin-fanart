@@ -23,19 +23,14 @@ Available for Linux amd64, Linux arm64 and macOS arm64.
 
 ## Settings
 
+- **Language** (default English) is the language artwork with text is taken in. **Fallback language** (default English) is used when nothing exists in the main one; choose **None** for textless artwork only. Artwork in any other language is never supplied, and textless artwork is always allowed.
 - **Artwork types** limits what the plugin supplies.
-- **Best image only** supplies one image per type on refresh; the manual picker still shows every image. **All matching images** supplies every image.
+- **Best image only** supplies one image per type on refresh; the manual picker still shows every image in the chosen languages. **All matching images** supplies every image.
 - **Cache hours** controls how long Fanart.tv lookups are reused. Default: 24. Set 0 to disable.
 
 ## Selection
 
-Within each type, images are ranked by language, then HD, then Fanart.tv likes:
-
-| Type | Language order |
-| --- | --- |
-| Posters, season posters | requested language, English, other languages, no text |
-| Backgrounds | no text, requested language, English, others |
-| Logos, clear art, banners, thumbs, discs | requested language, English, no text, others |
+Within each type, images are ranked by language, then HD, then Fanart.tv likes. Posters, logos, clear art, banners, thumbs and discs prefer the main language, then the fallback, then textless art. Backgrounds prefer textless art, then the main language, then the fallback.
 
 HD logos and HD clear art rank ahead of the older low-resolution versions. Fanart.tv has no episode artwork.
 
