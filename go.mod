@@ -1,6 +1,6 @@
 module github.com/Joloxx9/silo-plugin-fanart
 
-go 1.26.9
+go 1.26.10
 
 require (
 	github.com/Silo-Server/silo-plugin-sdk v0.24.0
