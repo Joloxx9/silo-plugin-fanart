@@ -165,7 +165,7 @@ func (s *server) GetImages(ctx context.Context, r *pluginv1.GetImagesRequest) (*
 		if !cfg.Types[kind] {
 			continue
 		}
-		chosen := rank(b, kind, season, cfg)
+		chosen := rank(b, kind, season, r.GetLanguage())
 		if !all && len(chosen) > 1 {
 			chosen = chosen[:1]
 		}
@@ -220,7 +220,7 @@ func (s *server) GetSeasons(ctx context.Context, r *pluginv1.GetSeasonsRequest) 
 			continue
 		}
 		seen[a.Season] = true
-		if chosen := rank(b, "season", a.Season, cfg); len(chosen) > 0 {
+		if chosen := rank(b, "season", a.Season, r.GetLanguage()); len(chosen) > 0 {
 			o.Seasons = append(o.Seasons, &pluginv1.SeasonRecord{SeasonNumber: int32(a.Season), PosterPath: canonical(chosen[0])})
 		}
 	}

@@ -113,9 +113,6 @@ func TestConfigureValidation(t *testing.T) {
 		{"api_key": "x", "artwork_types": []any{"poster", "characterart"}},
 		{"api_key": "x", "cache_hours": 1.5},
 		{"api_key": "x", "cache_hours": 500},
-		{"api_key": "x", "language": "polish"},
-		{"api_key": "x", "language": "00"},
-		{"api_key": "x", "fallback_language": "PL"},
 		{"api_key": "x", "media_types": []any{"episode"}},
 	} {
 		if _, err := parseSettings(structFromMap(bad).AsMap()); err == nil {
@@ -134,8 +131,7 @@ func TestConfigureValidation(t *testing.T) {
 func TestMovieImagesBestOnly(t *testing.T) {
 	var calls atomic.Int32
 	s := testServer(t, &calls)
-	configure(t, s, map[string]any{"api_key": "mykey", "language": "pl"})
-	r := &pluginv1.GetImagesRequest{ItemType: "movie", Language: "de", ProviderIds: providerIDs(t, map[string]any{"tmdb": "603"})}
+	r := &pluginv1.GetImagesRequest{ItemType: "movie", Language: "pl-PL", ProviderIds: providerIDs(t, map[string]any{"tmdb": "603"})}
 	got, err := s.GetImages(context.Background(), r)
 	if err != nil {
 		t.Fatal(err)
@@ -169,8 +165,7 @@ func TestMovieGalleryAndLanguageOrder(t *testing.T) {
 		t.Fatal(err)
 	}
 	posters := urls(got.GetImages())["poster"]
-	// Default language and fallback are English; Polish is never supplied.
-	want := []string{"the-matrix-en-high.jpg", "the-matrix-en-low.jpg", "movies/603/movieposter/plain.jpg"}
+	want := []string{"the-matrix-en-high.jpg", "the-matrix-en-low.jpg", "the-matrix-pl.jpg", "movies/603/movieposter/plain.jpg"}
 	if strings.Join(posters, ",") != strings.Join(want, ",") {
 		t.Fatalf("posters = %v", posters)
 	}
@@ -294,23 +289,5 @@ func TestLanguageNormalization(t *testing.T) {
 		if got := normalizeLanguage(in); got != want {
 			t.Errorf("normalizeLanguage(%q) = %q, want %q", in, got, want)
 		}
-	}
-}
-
-func TestLanguageWithoutFallback(t *testing.T) {
-	var calls atomic.Int32
-	s := testServer(t, &calls)
-	configure(t, s, map[string]any{"api_key": "mykey", "language": "pl", "fallback_language": "none", "image_selection": "All"})
-	got, err := s.GetImages(context.Background(), &pluginv1.GetImagesRequest{ItemType: "movie", ProviderIds: providerIDs(t, map[string]any{"tmdb": "603"})})
-	if err != nil {
-		t.Fatal(err)
-	}
-	u := urls(got.GetImages())
-	if strings.Join(u["poster"], ",") != "the-matrix-pl.jpg,movies/603/movieposter/plain.jpg" || len(u["logo"]) != 0 || len(u["backdrop"]) != 1 {
-		t.Fatalf("images = %v", u)
-	}
-	cfg := s.p.snapshot()
-	if cfg.Language != "pl" || cfg.Fallback != "pl" {
-		t.Fatalf("cfg = %+v", cfg)
 	}
 }

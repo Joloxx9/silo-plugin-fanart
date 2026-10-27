@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.4
+
+- Remove the language and fallback language settings: the library language Silo sends decides, as in 0.1.0.
+
 ## 0.1.3
 
 - Fix: every image failed to cache ("image resolver returned empty URL") because Silo passes the path without the fanart:// prefix.
