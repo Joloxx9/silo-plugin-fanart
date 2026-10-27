@@ -27,6 +27,11 @@ jobs:
         run: make check audit
       - name: Build install archive
         run: python3 tools/package.py --platform linux/amd64
+      - name: Upload install archive
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: silo-plugin-fanart-linux-amd64
+          path: dist/*/silo-plugin-fanart-*-linux-amd64.zip
       - name: Verify reproducible archive
         run: |
           python3 tools/package.py --platform linux/amd64 --output "$RUNNER_TEMP/fanart-repeat"
