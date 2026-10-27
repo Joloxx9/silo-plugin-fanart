@@ -100,7 +100,7 @@ func TestManifestLoads(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if m.GetPluginId() != "community.fanart" || len(m.GetCapabilities()) != 2 {
+	if m.GetPluginId() != "community.fanart" || len(m.GetCapabilities()) != 3 || len(m.GetHttpRoutes()) != 1 {
 		t.Fatalf("manifest = %v", m)
 	}
 }
@@ -289,5 +289,27 @@ func TestLanguageNormalization(t *testing.T) {
 		if got := normalizeLanguage(in); got != want {
 			t.Errorf("normalizeLanguage(%q) = %q, want %q", in, got, want)
 		}
+	}
+}
+
+func TestStatusPage(t *testing.T) {
+	var calls atomic.Int32
+	s := testServer(t, &calls)
+	page, err := s.Handle(context.Background(), &pluginv1.HandleHTTPRequest{Method: "GET", Path: "/status", Headers: map[string]string{"X-Silo-User-Role": "admin"}})
+	if err != nil || page.GetStatusCode() != 200 {
+		t.Fatalf("status = %v, %v", page, err)
+	}
+	body := string(page.GetBody())
+	if !strings.Contains(body, ">Saved<") || !strings.Contains(body, "Key accepted") || strings.Contains(body, "mykey") {
+		t.Fatalf("body = %s", body)
+	}
+	denied, err := s.Handle(context.Background(), &pluginv1.HandleHTTPRequest{Method: "GET", Path: "/status"})
+	if err != nil || denied.GetStatusCode() != 403 {
+		t.Fatalf("anonymous = %v, %v", denied, err)
+	}
+	empty := &server{p: newProvider()}
+	page, _ = empty.Handle(context.Background(), &pluginv1.HandleHTTPRequest{Method: "GET", Path: "/status", Headers: map[string]string{"X-Silo-User-Role": "admin"}})
+	if !strings.Contains(string(page.GetBody()), "Not saved") {
+		t.Fatalf("unconfigured body = %s", page.GetBody())
 	}
 }

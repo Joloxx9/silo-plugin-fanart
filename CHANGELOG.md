@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.5
+
+- **Fanart.tv status** page in the admin menu: shows whether the API key is saved and whether Fanart.tv accepts it.
+
 ## 0.1.4
 
 - Remove the language and fallback language settings: the library language Silo sends decides, as in 0.1.0.

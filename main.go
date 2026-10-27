@@ -28,6 +28,7 @@ type server struct {
 	runtimedefault.Server
 	pluginv1.UnimplementedMetadataProviderServer
 	pluginv1.UnimplementedImageResolverServer
+	pluginv1.UnimplementedHttpRoutesServer
 	m *pluginv1.PluginManifest
 	p *provider
 }
@@ -260,5 +261,5 @@ func main() {
 		}
 	}
 	s := &server{m: m, p: newProvider()}
-	runtime.Serve(runtime.ServeConfig{Servers: runtime.CapabilityServers{Runtime: s, MetadataProvider: s, ImageResolver: s}})
+	runtime.Serve(runtime.ServeConfig{Servers: runtime.CapabilityServers{Runtime: s, MetadataProvider: s, ImageResolver: s, HttpRoutes: s}})
 }

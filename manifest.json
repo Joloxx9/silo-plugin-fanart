@@ -1,6 +1,6 @@
 {
   "plugin_id": "community.fanart",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "checksum": "__CHECKSUM__",
   "silo_api_version": "v1",
   "presentation": {
@@ -65,6 +65,12 @@
         ],
         "priority": 100
       }
+    },
+    {
+      "type": "http_routes.v1",
+      "id": "status",
+      "display_name": "Fanart.tv status",
+      "description": "Admin-only page showing whether the API key is saved and accepted."
     }
   ],
   "global_config_schema": [
@@ -179,6 +185,17 @@
         ]
       },
       "description": "Fanart.tv API keys and artwork preferences."
+    }
+  ],
+  "http_routes": [
+    {
+      "id": "status",
+      "method": "GET",
+      "path": "/status",
+      "access": "admin",
+      "navigable": true,
+      "navigation_label": "Fanart.tv status",
+      "navigation_kind": "admin"
     }
   ]
 }

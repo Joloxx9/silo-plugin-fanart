@@ -19,7 +19,8 @@ Available for Linux amd64, Linux arm64 and macOS arm64.
 1. Copy the personal API key from your fanart.tv profile and save it in the plugin settings as **Fanart.tv API key**.
 2. Add **Fanart.tv Artwork** to the movie, series and season provider lists. Put it first for the types you want from Fanart.tv, or after another artwork provider (TMDB, MediUX) to fill gaps such as clear art, discs and banners.
 3. Keep a metadata provider for titles and IDs. Movies are looked up by TMDB or IMDb ID, series by TVDB ID.
-4. Refresh an item to apply. Saving settings does not replace existing artwork.
+4. Open **Fanart.tv status** in the admin menu to confirm the key is saved and accepted. In the settings form the key field stays empty after saving; leave it empty to keep the saved key.
+5. Refresh an item to apply. Saving settings does not replace existing artwork.
 
 ## Settings
 
