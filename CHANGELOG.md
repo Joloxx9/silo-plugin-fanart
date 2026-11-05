@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.6
+
+- Declare `lookup_images`, the key upstream Silo uses to ask an artwork plugin for images by TMDB, IMDb or TVDB ID. Without it, current Silo builds never call Fanart.tv for images. `image_lookup_provider_ids` stays for older builds.
+
 ## 0.1.5
 
 - **Fanart.tv status** page in the admin menu: shows whether the API key is saved and whether Fanart.tv accepts it.
