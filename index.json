@@ -1,0 +1,223 @@
+{
+  "plugins": [
+    {
+      "manifest": {
+        "plugin_id": "community.fanart",
+        "version": "0.1.6",
+        "silo_api_version": "v1",
+        "presentation": {
+          "display_name": "Fanart.tv Artwork",
+          "summary": "Posters, backgrounds, logos, clear art, banners, thumbs, discs and season posters from Fanart.tv.",
+          "description_markdown": "Community Fanart.tv artwork provider. It supplies remote Fanart.tv URLs; Silo controls local or S3 artwork caching. Fanart.tv has no episode artwork.",
+          "setup_markdown": "Enter your Fanart.tv **API key** (the personal key from your fanart.tv profile), then add **Fanart.tv Artwork** to the movie, series and season provider lists. Movies are looked up by TMDB or IMDb ID, series by TVDB ID; keep another metadata provider for those IDs and for text.",
+          "homepage_url": "https://fanart.tv",
+          "publisher_name": "Joloxx9",
+          "source_url": "https://github.com/Joloxx9/silo-plugin-fanart",
+          "support_url": "https://github.com/Joloxx9/silo-plugin-fanart/issues",
+          "changelog_url": "https://github.com/Joloxx9/silo-plugin-fanart/releases",
+          "publisher_url": "https://github.com/Joloxx9",
+          "license_spdx": "AGPL-3.0-or-later"
+        },
+        "supported_platforms": [
+          {
+            "os": "linux",
+            "arch": "amd64"
+          },
+          {
+            "os": "linux",
+            "arch": "arm64"
+          },
+          {
+            "os": "darwin",
+            "arch": "arm64"
+          }
+        ],
+        "capabilities": [
+          {
+            "type": "metadata_provider.v1",
+            "id": "fanart",
+            "display_name": "Fanart.tv Artwork",
+            "description": "Fanart.tv artwork for movies, series and seasons.",
+            "metadata": {
+              "default_priority": {
+                "movie": 5,
+                "series": 5,
+                "season": 5
+              },
+              "lookup_provider_ids": [
+                "tmdb",
+                "imdb",
+                "tvdb"
+              ],
+              "image_lookup_provider_ids": [
+                "tmdb",
+                "imdb",
+                "tvdb"
+              ],
+              "lookup_images": true
+            }
+          },
+          {
+            "type": "image_resolver.v1",
+            "id": "fanart",
+            "display_name": "Fanart.tv Images",
+            "description": "Resolves fanart:// artwork paths.",
+            "metadata": {
+              "schemes": [
+                "fanart"
+              ],
+              "priority": 100
+            }
+          },
+          {
+            "type": "http_routes.v1",
+            "id": "status",
+            "display_name": "Fanart.tv status",
+            "description": "Admin-only page showing whether the API key is saved and accepted."
+          }
+        ],
+        "global_config_schema": [
+          {
+            "key": "settings",
+            "title": "Fanart.tv settings",
+            "required": true,
+            "json_schema": "{\"type\":\"object\",\"required\":[\"api_key\"],\"properties\":{\"api_key\":{\"type\":\"string\",\"minLength\":1},\"artwork_types\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"poster\",\"backdrop\",\"logo\",\"clearart\",\"banner\",\"thumb\",\"disc\",\"season\"]}},\"image_selection\":{\"type\":\"string\",\"enum\":[\"BestOnly\",\"All\"]},\"cache_hours\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":168},\"media_types\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"movie\",\"series\"]}}}}",
+            "admin_form": {
+              "fields": [
+                {
+                  "key": "api_key",
+                  "label": "Fanart.tv API key",
+                  "description": "Your personal API key from your fanart.tv profile.",
+                  "control": "ADMIN_FORM_CONTROL_PASSWORD",
+                  "secret": true,
+                  "required": true
+                },
+                {
+                  "key": "media_types",
+                  "label": "Use for",
+                  "description": "Which media this plugin supplies artwork for.",
+                  "control": "ADMIN_FORM_CONTROL_MULTI_SELECT",
+                  "default_value": [
+                    "movie"
+                  ],
+                  "options": [
+                    {
+                      "value": "movie",
+                      "label": "Movies"
+                    },
+                    {
+                      "value": "series",
+                      "label": "Series and seasons"
+                    }
+                  ]
+                },
+                {
+                  "key": "artwork_types",
+                  "label": "Artwork types",
+                  "description": "Which kinds of Fanart.tv artwork to supply.",
+                  "control": "ADMIN_FORM_CONTROL_MULTI_SELECT",
+                  "default_value": [
+                    "poster",
+                    "backdrop",
+                    "logo",
+                    "clearart",
+                    "banner",
+                    "thumb",
+                    "disc",
+                    "season"
+                  ],
+                  "options": [
+                    {
+                      "value": "poster",
+                      "label": "Posters"
+                    },
+                    {
+                      "value": "backdrop",
+                      "label": "Backgrounds"
+                    },
+                    {
+                      "value": "logo",
+                      "label": "Logos"
+                    },
+                    {
+                      "value": "clearart",
+                      "label": "Clear art"
+                    },
+                    {
+                      "value": "banner",
+                      "label": "Banners"
+                    },
+                    {
+                      "value": "thumb",
+                      "label": "Thumbs (landscape)"
+                    },
+                    {
+                      "value": "disc",
+                      "label": "Discs"
+                    },
+                    {
+                      "value": "season",
+                      "label": "Season posters"
+                    }
+                  ]
+                },
+                {
+                  "key": "image_selection",
+                  "label": "Images supplied on refresh",
+                  "control": "ADMIN_FORM_CONTROL_SELECT",
+                  "default_value": "BestOnly",
+                  "options": [
+                    {
+                      "value": "BestOnly",
+                      "label": "Best image only",
+                      "description": "One image per type; the manual picker still shows every image."
+                    },
+                    {
+                      "value": "All",
+                      "label": "All matching images"
+                    }
+                  ]
+                },
+                {
+                  "key": "cache_hours",
+                  "label": "Cache hours",
+                  "description": "How long Fanart.tv lookups are reused. 0 disables the cache.",
+                  "control": "ADMIN_FORM_CONTROL_NUMBER",
+                  "default_value": 24
+                }
+              ]
+            },
+            "description": "Fanart.tv API keys and artwork preferences."
+          }
+        ],
+        "http_routes": [
+          {
+            "id": "status",
+            "method": "GET",
+            "path": "/status",
+            "access": "admin",
+            "navigable": true,
+            "navigation_label": "Fanart.tv status",
+            "navigation_kind": "admin"
+          }
+        ]
+      },
+      "repo_url": "https://github.com/Joloxx9/silo-plugin-fanart",
+      "checksums_url": "https://github.com/Joloxx9/silo-plugin-fanart/releases/download/v0.1.6/checksums.txt",
+      "binaries": {
+        "linux/amd64": {
+          "url": "https://github.com/Joloxx9/silo-plugin-fanart/releases/download/v0.1.6/plugin-linux-amd64",
+          "checksum": "4181771dd66d9f3033a2f7efd542439761716ee07fed0a15a99a666a25bdcc2c"
+        },
+        "linux/arm64": {
+          "url": "https://github.com/Joloxx9/silo-plugin-fanart/releases/download/v0.1.6/plugin-linux-arm64",
+          "checksum": "8a3ddbc4182c8d811dd033ea8e0a858e3411a0b9b166d2e14ddae409b78d5a10"
+        },
+        "darwin/arm64": {
+          "url": "https://github.com/Joloxx9/silo-plugin-fanart/releases/download/v0.1.6/plugin-darwin-arm64",
+          "checksum": "a7d701db567b5917983cf08b913295184b3bd41275064cfc3c2ed1386084ed74"
+        }
+      }
+    }
+  ]
+}
