@@ -50,15 +50,15 @@ jobs:
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          ref: main
-      - name: Publish released index on main
+          ref: spark
+      - name: Publish released index on spark
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           version="${GITHUB_REF_NAME#v}"
           current=$(python3 -c 'import json; print(json.load(open("manifest.json"))["version"])')
           if [ "$current" != "$version" ]; then
-            echo "::notice::Main has moved to another version; release asset index remains available."
+            echo "::notice::Spark has moved to another version; release asset index remains available."
             exit 0
           fi
           gh release download "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
@@ -69,4 +69,4 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "chore: publish install index for $GITHUB_REF_NAME"
-          git push origin HEAD:main
+          git push origin HEAD:spark

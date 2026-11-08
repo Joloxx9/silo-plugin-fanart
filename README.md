@@ -7,7 +7,7 @@ Movie and series posters, backgrounds, logos, clear art, banners, thumbs, discs 
 1. Open Silo's administrator **Plugins** page, select **Catalog**, and click **Add repository**. Give it a name such as **Fanart.tv** and use this URL:
 
    ```text
-   https://raw.githubusercontent.com/Joloxx9/silo-plugin-fanart/main/index.json
+   https://raw.githubusercontent.com/Joloxx9/silo-plugin-fanart/spark/index.json
    ```
 
 2. In **Catalog**, find **Fanart.tv Artwork**, click **Install**, then enable it.
